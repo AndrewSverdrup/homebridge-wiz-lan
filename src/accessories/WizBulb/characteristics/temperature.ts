@@ -21,7 +21,7 @@ export function initTemperature(
   device: Device,
   wiz: HomebridgeWizLan
 ) {
-  const { Characteristic, Service } = wiz;
+  const { Characteristic, Service, config } = wiz;
   const service = accessory.getService(Service.Lightbulb)!;
   service
     .getCharacteristic(Characteristic.ColorTemperature)
@@ -37,16 +37,21 @@ export function initTemperature(
     .on(
       "set",
       (newValue: CharacteristicValue, next: CharacteristicSetCallback) => {
-        setPilot(
-          wiz,
-          accessory,
-          device,
-          {
+        let params = {};
+        if (config.lastStatus !== true) {
+          params = {
             temp: miredToKelvin(Number(newValue)),
             r: undefined,
             g: undefined,
             b: undefined,
-          },
+          }
+        }
+
+        setPilot(
+          wiz,
+          accessory,
+          device,
+          params,
           updateColorTemp(device, accessory, wiz, next)
         );
       }

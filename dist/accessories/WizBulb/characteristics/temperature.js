@@ -8,18 +8,22 @@ function transformTemperature(pilot) {
 }
 exports.transformTemperature = transformTemperature;
 function initTemperature(accessory, device, wiz) {
-    const { Characteristic, Service } = wiz;
+    const { Characteristic, Service, config } = wiz;
     const service = accessory.getService(Service.Lightbulb);
     service
         .getCharacteristic(Characteristic.ColorTemperature)
         .on("get", (callback) => pilot_1.getPilot(wiz, accessory, device, (pilot) => callback(null, transformTemperature(pilot)), callback))
         .on("set", (newValue, next) => {
-        pilot_1.setPilot(wiz, accessory, device, {
-            temp: color_1.miredToKelvin(Number(newValue)),
-            r: undefined,
-            g: undefined,
-            b: undefined,
-        }, pilot_1.updateColorTemp(device, accessory, wiz, next));
+        let params = {};
+        if (config.lastStatus !== true) {
+            params = {
+                temp: color_1.miredToKelvin(Number(newValue)),
+                r: undefined,
+                g: undefined,
+                b: undefined,
+            };
+        }
+        pilot_1.setPilot(wiz, accessory, device, params, pilot_1.updateColorTemp(device, accessory, wiz, next));
     });
 }
 exports.initTemperature = initTemperature;
